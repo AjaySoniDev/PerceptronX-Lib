@@ -1,44 +1,57 @@
 <h1 align="center">PerceptronX-Lib</h1>
 
 <p align="center">
-  <strong>Custom Python perceptron learning library.</strong><br>
-  Implements regression, binary classification, experimental multiclass support, scaling helpers, gradient descent, prediction, and scoring.
+  <strong>From-scratch-oriented perceptron learning library for studying regression and classification mechanics.</strong><br>
+  Implements custom gradient-descent training, scaling helpers, binary classification, linear regression, experimental multiclass handling, prediction, and metric-based scoring.
 </p>
 
-
 <p align="center">
-  <img alt="GitHub Repo stars" src="https://img.shields.io/github/stars/AjaySoni-Dev/PerceptronX-Lib?style=social">
-  <img alt="GitHub forks" src="https://img.shields.io/github/forks/AjaySoni-Dev/PerceptronX-Lib?style=social">
-</p>
-
-
-<p align="center">
-  <img alt="status: learning library" src="https://img.shields.io/badge/status-learning%20library-blue">
-  <img alt="stack: Python" src="https://img.shields.io/badge/stack-Python-informational">
-  <img alt="license: MIT" src="https://img.shields.io/badge/license-MIT-green">
+  <img alt="Status" src="https://img.shields.io/badge/status-learning%20library-blue">
+  <img alt="Language" src="https://img.shields.io/badge/language-Python-3776AB">
+  <img alt="Core" src="https://img.shields.io/badge/core-NumPy-orange">
+  <img alt="Metrics" src="https://img.shields.io/badge/metrics-scikit--learn-informational">
+  <img alt="License" src="https://img.shields.io/badge/license-MIT-green">
 </p>
 
 <p align="center">
   <a href="#overview">Overview</a> ·
-  <a href="#implemented-api">Implemented API</a> ·
-  <a href="#repository-structure">Repository Structure</a> ·
-  <a href="#usage">Usage</a> ·
-  <a href="#limitations">Limitations</a>
+  <a href="#what-this-repo-contains">Contents</a> ·
+  <a href="#implemented-api">API</a> ·
+  <a href="#learning-flow">Learning Flow</a> ·
+  <a href="#current-limitations">Limitations</a>
 </p>
 
 ---
 
 ## Overview
 
-**PerceptronX-Lib** is a small custom machine-learning library focused on perceptron-based learning. The project is useful for understanding how model training, scaling, gradient descent, prediction, and evaluation work internally.
+**PerceptronX-Lib** is a compact educational machine-learning library implemented in Python.
 
-The uploaded repository contains the implementation file and README, but it does not include packaging files such as `pyproject.toml`, `setup.py`, examples, tests, or notebooks. Because of that, this README describes it as a local learning library rather than claiming it is a complete production Python package.
+Its purpose is to expose training mechanics that higher-level libraries normally hide: weight initialization, gradient updates, activation functions, scaling, validation splitting, prediction, and metric calculation.
+
+The implementation automatically categorizes the target into a linear/regression, binary, or experimental multiclass path.
+
+> Multiclass support is explicitly experimental in the source. The code warns that the learning path is for demonstration and may perform poorly on multiclass tasks.
+
+---
+
+## What This Repo Contains
+
+| File | Purpose |
+|---|---|
+| <code>PerceptronX/Perceptron.py</code> | Complete <code>Perceptron</code> implementation and helper functions. |
+| <code>README.md</code> | Project documentation. |
+| <code>LICENSE</code> | MIT License. |
+
+The repository does not currently contain packaging metadata, automated tests, notebooks, or a published package build.
+
+---
 
 ## Implemented API
 
-The main class is:
+### Constructor
 
-```python
+~~~python
 Perceptron(
     learning_rate=0.001,
     validation_split=0.2,
@@ -46,82 +59,127 @@ Perceptron(
     is_scaled=False,
     tolerance=1e-6
 )
-```
+~~~
 
-Implemented methods:
+### <code>fit(X, y)</code>
 
-| Method | Purpose |
+The implementation selects a task path, optionally creates a validation split, performs scaling checks/transforms, runs gradient-descent updates, reports validation information, and stores learned weights/bias.
+
+### <code>predict(X)</code>
+
+- linear path → continuous values;
+- binary path → sigmoid + 0.5 threshold;
+- multiclass path → softmax + <code>argmax</code>.
+
+<code>fit()</code> must be called before prediction.
+
+### <code>score(X, y, metrics)</code>
+
+The live implementation requires an explicit **third argument**: <code>metrics</code>.
+
+| Task | Supported metric strings |
 |---|---|
-| `fit(X, y)` | Trains the perceptron and automatically detects binary, multiclass, or regression-style targets. |
-| `predict(X)` | Generates predictions using learned weights and bias. |
-| `score(X, y)` | Evaluates predictions using task-specific metrics. |
+| Linear / regression | <code>mse</code>, <code>rmse</code>, <code>rmsle</code> |
+| Binary classification | <code>accuracy</code>, <code>precision</code>, <code>recall</code>, <code>f1</code> |
+| Multiclass classification | <code>accuracy</code>, <code>precision</code>, <code>recall</code>, <code>f1</code> |
 
-Helper functions include:
+Multiclass precision/recall/F1 use weighted averaging in the current source.
 
-- gradient descent optimization,
-- sigmoid activation,
-- softmax helper,
-- cost function,
-- one-hot encoding,
-- standard scaling,
-- min-max scaling,
-- scaled-data validation,
-- regression and classification metrics.
+---
 
-## Repository Structure
+## Learning Flow
 
-| File | Purpose |
-|---|---|
-| `PerceptronX/Perceptron.py` | Main implementation containing the `Perceptron` class and helper functions. |
-| `README.md` | Original documentation. |
-| `LICENSE` | MIT license. |
+~~~text
+pandas feature matrix + target
+   ↓
+Task-type detection
+   ↓
+Optional validation split
+   ↓
+Scaling checks / scaling transform
+   ↓
+Weight + bias initialization
+   ↓
+Gradient-descent loop
+   ↓
+Validation output
+   ↓
+predict(...)
+   ↓
+score(..., metrics)
+~~~
+
+---
 
 ## Dependencies
 
-Install the likely required libraries:
+The implementation uses NumPy, pandas, scikit-learn utilities, and colorama.
 
-```bash
+~~~bash
 pip install numpy pandas scikit-learn colorama
-```
+~~~
 
-## Usage
+---
 
-Example local usage:
+## Example
 
-```python
+~~~python
 from PerceptronX.Perceptron import Perceptron
 
 model = Perceptron(
     learning_rate=0.001,
     validation_split=0.2,
     scaling="standard",
-    is_scaled=False,
-    tolerance=1e-6
+    tolerance=1e-6,
 )
 
 model.fit(X_train, y_train)
 predictions = model.predict(X_test)
-score = model.score(X_test, y_test)
-```
+accuracy = model.score(X_test, y_test, "accuracy")
+~~~
 
-## Limitations
+Choose a metric that matches the detected task type.
 
-- The repo currently has no packaging configuration.
-- The README previously mixed `IntelliNeuro` and `PerceptronX` naming, so this version uses the repository name consistently.
-- The training loop can be expensive because it allows very high iteration counts.
-- Multiclass support is experimental and should be tested carefully.
-- There are no automated tests yet.
-- The library depends on scikit-learn metrics and preprocessing utilities, so it is not a pure NumPy-only implementation.
+---
 
-## Recommended Improvements
+## Architecture
 
-- Add `pyproject.toml` or `setup.py`.
-- Add example notebooks.
-- Add unit tests.
-- Add benchmark results on small datasets.
-- Add clearer error messages.
-- Add documentation for input shapes and supported target types.
+~~~text
+Perceptron.py
+├── Perceptron
+│   ├── fit
+│   ├── predict
+│   └── score
+├── gradient_descent_optimisation
+├── prediction helpers
+├── sigmoid / softmax helpers
+├── scaling helpers
+├── validation helper
+├── one-hot encoding helper
+└── loss / metric support
+~~~
+
+---
+
+## Current Limitations
+
+PerceptronX-Lib is a **learning library**, not a production ML framework.
+
+Current boundaries include:
+
+- no <code>pyproject.toml</code> / <code>setup.py</code>;
+- no automated tests;
+- no API stability contract;
+- no serialized model format;
+- potentially long training loops for strict tolerances;
+- in-place dataframe scaling behavior in parts of the implementation;
+- experimental multiclass logic;
+- dependence on scikit-learn for metrics and train/validation splitting.
+
+Strong code quality or a successful example run should not be presented as a general benchmark of model accuracy.
+
+---
 
 ## License
 
-This project is licensed under the MIT License.
+Released under the **MIT License**. See <code>LICENSE</code>.
